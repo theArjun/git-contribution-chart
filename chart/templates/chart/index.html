@@ -1,0 +1,216 @@
+<!doctype html>
+{% load staticfiles %}
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Vollkorn&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>GitHub Contribution Chart - {{ username }}</title>
+    <style>
+        body {
+            font-family: 'Vollkorn', serif;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href = {% url 'index' %}>Git Chart</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item" id="nav_year" style="cursor: pointer;" >
+                <a id="nav_link_year" class="nav-link mr-3">
+                    <hr class="d-xl-none d-lg-none">
+                    <span class=""> &nbsp; Yearly Contribution</span>
+                    <hr class="d-xl-none d-lg-none">
+                </a>
+            </li>
+            <li class="nav-item" id="nav_month" style="cursor: pointer;" >
+                <a id="nav_link_month" class="nav-link mr-3">
+                    <span class=""> &nbsp; Monthly Contribution</span>
+                    <hr class="d-xl-none d-lg-none">
+                </a>
+            </li>
+            <li class="nav-item" id="nav_week" style="cursor: pointer;" >
+                <a id="nav_link_week" class="nav-link">
+                    <span class=""> &nbsp; Weekly Contribution</span>
+                    <hr class="d-xl-none d-lg-none">
+                </a>
+            </li>
+        </ul>
+        <form method="POST" class="form-inline mx-5 my-lg-0" action={% url 'index' %}>
+            {% csrf_token %}
+            <input class="form-control mr-sm-2" type="search" placeholder="Search using GitHub" aria-label="Search"
+                   name="username" autofocus>
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </div>
+</nav>
+
+<div class="jumbotron">
+    <div class="container text-center">
+        <h1>Welcome, {{ username }}</h1>
+        <h5 class="mt-3">Your GitHub contribution chart is </h5>
+    </div>
+</div>
+
+<div class="container">
+    <canvas id="year" width="450" height="200"></canvas>
+    <canvas id="month" width="450" height="200"></canvas>
+    <canvas id="week" width="450" height="200"></canvas>
+</div>
+
+<footer class="fixed-bottom bg-primary text-light pt-4">
+
+  <div class="footer-copyright text-center py-3">© 2019 Copyright
+    <a style="color: white;" href="https://github.com/thearjun" > Arjun Adhikari</a>
+  </div>
+
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+<script>
+    var year_ctx = document.getElementById('year').getContext('2d');
+    var year_myChart = new Chart(year_ctx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for datum in year_date %}
+                    '{{ datum }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for datum in year_contribution %}
+                        {{ datum }},
+                    {% endfor %}
+                ],
+                label: "Productivity",
+                borderColor: "#f5429e",
+                fill: false
+            }
+            ]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Yearly Contribution Chart'
+            }
+        }
+    });
+
+    var month_ctx = document.getElementById('month').getContext('2d');
+    var month_myChart = new Chart(month_ctx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for datum in month_date %}
+                    '{{ datum }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for datum in month_contribution %}
+                        {{ datum }},
+                    {% endfor %}
+                ],
+                label: "Productivity",
+                borderColor: "#427ef5",
+                fill: false
+            }
+            ]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Monthly Contribution Chart'
+            }
+        }
+    });
+
+    var week_ctx = document.getElementById('week').getContext('2d');
+    var week_myChart = new Chart(week_ctx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for datum in week_date %}
+                    '{{ datum}}',
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for datum in week_contribution %}
+                        {{ datum }},
+                    {% endfor %}
+                ],
+                label: "Productivity",
+                borderColor: "#477",
+                fill: false
+            }
+            ]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Weekly Contribution Chart'
+            }
+        }
+    });
+
+    document.getElementById('year').style.display = 'none';
+    document.getElementById('month').style.display = 'block';
+    document.getElementById('week').style.display = 'none';
+
+
+    document.getElementById('nav_year').addEventListener('click',
+
+        function () {
+            document.getElementById('year').style.display = 'block';
+            document.getElementById('month').style.display = 'none';
+            document.getElementById('week').style.display = 'none';
+        }
+    );
+
+    document.getElementById('nav_month').addEventListener('click',
+
+        function () {
+            document.getElementById('year').style.display = 'none';
+            document.getElementById('month').style.display = 'block';
+            document.getElementById('week').style.display = 'none';
+        }
+    );
+
+    document.getElementById('nav_week').addEventListener('click',
+
+        function () {
+            document.getElementById('year').style.display = 'none';
+            document.getElementById('month').style.display = 'none';
+            document.getElementById('week').style.display = 'block';
+        }
+    );
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+</html>
