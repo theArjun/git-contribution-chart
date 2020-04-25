@@ -11,9 +11,21 @@ def index(request):
     soup = BeautifulSoup(response.text, 'html.parser')
 
     data = soup.findAll('rect')
-    username = soup.select_one("span.p-name").text
-    if str(username) == '':
-        username = soup.select_one("span.p-nickname").text
+
+
+    
+    try:
+        username = soup.select_one("span.p-name").text
+
+        if str(username) == '':
+            username = soup.select_one("span.p-nickname").text
+
+        welcome = f'Welcome, {username}'
+        message = 'Your GitHub contribution chart is'
+
+    except Exception as e:
+        welcome = 'User not found !'
+        message = f'You can create account with name "{username}"'
 
     year_contribution = [int(el.get('data-count')) for el in data]
     year_date = [el.get('data-date') for el in data]
@@ -26,7 +38,8 @@ def index(request):
         request,
         'chart/index.html',
         {
-            'username': username,
+            'welcome': welcome,
+            'message' : message,
             'year_date': year_date,
             'year_contribution': year_contribution,
             'month_date': month_date,
